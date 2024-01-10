@@ -1,24 +1,8 @@
 import fs from "node:fs/promises";
+import { Timezone } from "../model";
 
 // Create timezone map using the timezoneapi
 // https://worldtimeapi.org/api/timezone
-export type Timezone = {
-  abbreviation: string;
-  client_ip: string;
-  datetime: string;
-  day_of_week: number;
-  day_of_year: number;
-  dst: boolean;
-  dst_from: null;
-  dst_offset: number;
-  dst_until: null;
-  raw_offset: number;
-  timezone: string;
-  unixtime: number;
-  utc_datetime: string;
-  utc_offset: string;
-  week_number: number;
-};
 
 export async function POST() {
   try {

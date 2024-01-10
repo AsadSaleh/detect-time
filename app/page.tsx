@@ -6,7 +6,7 @@ const target = "Sat Jan 6, 2024 12:59 AM CET";
 export default async function Home() {
   // await getTimezones();
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-4">
+    <main className="flex min-h-screen flex-col items-center p-4 pt-40">
       <div className="w-full md:w-1/2 mx-auto">
         <TimeCalculator />
       </div>

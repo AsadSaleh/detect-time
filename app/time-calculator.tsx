@@ -8,9 +8,10 @@ import {
 } from "date-fns";
 import { useState } from "react";
 import { TimezoneStaticInfo } from "./model";
+import CloseIcon from "./close-icon";
 
 export default function TimeCalculator() {
-  const [time, setTime] = useState("Sat Jan 6, 2024 12:59 AM CET");
+  const [time, setTime] = useState("");
 
   function renderResult() {
     const detectedDatetimeResult = detectDatetime(time);
@@ -20,13 +21,9 @@ export default function TimeCalculator() {
     if (time === "") {
       return (
         <div>
-          <p className="text-lg mt-4">
-            Input your datetime in the input above. It will autodetect the
-            result!
-          </p>
           <div className="mt-2">
-            <p>Example:</p>
-            <ul>
+            <p className="text-slate-600">Example:</p>
+            <ul className="list-disc list-inside">
               <li>
                 <button
                   className="cursor-pointer hover:font-semibold"
@@ -65,13 +62,13 @@ export default function TimeCalculator() {
 
     // Display error message if the datetime is invalid (NaN)
     const date = detectedDatetimeResult.data;
-    const timezoneInfo = detectedDatetimeResult.timezoneInfo;
 
     if (date == null || isNaN(date.getTime())) {
       return <p className="text-lg mt-4">Invalid datetime</p>;
     }
 
-    // Display the result (calcualte the distance first)
+    // Display the result (calcualte some variables first)
+    const timezoneInfo = detectedDatetimeResult.timezoneInfo;
 
     const duration = intervalToDuration({
       start: new Date(),
@@ -93,10 +90,16 @@ export default function TimeCalculator() {
 
         {/* The time with it's detail */}
         <div>
-          The time is in{" "}
-          <span className="font-bold">
-            {timezoneInfo?.timezone} ({timezoneInfo?.abbreviation})
-          </span>
+          {timezoneInfo?.timezone ? (
+            <span>
+              The time is in&nbsp;
+              <span className="font-bold">
+                {timezoneInfo?.timezone} ({timezoneInfo?.abbreviation})
+              </span>
+            </span>
+          ) : (
+            <span>The time contains no timezone information</span>
+          )}
         </div>
 
         {/* In my local time */}
@@ -125,12 +128,22 @@ export default function TimeCalculator() {
   }
   return (
     <section>
-      <input
-        className="p-4 rounded-xl border-slate-300 border w-full"
-        value={time}
-        onChange={(e) => setTime(e.target.value)}
-        placeholder="Input your datetime here..."
-      />
+      <div className="relative">
+        <input
+          className="p-4 rounded-xl border-slate-300 border w-full"
+          value={time}
+          onChange={(e) => setTime(e.target.value)}
+          placeholder="Input your datetime here..."
+        />
+        {true && (
+          <button
+            className="group absolute rounded-lg bg-slate-400 hover:bg-slate-600 active:scale-90 transition w-[30px] h-[30px] flex items-center justify-center top-[14px] right-[14px]"
+            onClick={() => setTime("")}
+          >
+            <CloseIcon className="text-slate-600 group-hover:text-white" />
+          </button>
+        )}
+      </div>
 
       <div className="flex flex-col gap-2">{renderResult()}</div>
     </section>
@@ -148,7 +161,6 @@ type DetectDateTimeResult =
 // Detect datetime from a random string format
 function detectDatetime(str: string): DetectDateTimeResult {
   try {
-    console.log("STARTED");
     const date = new Date(str);
     if (date instanceof Date && !isNaN(date.getTime())) {
       return { status: "success", data: date };
@@ -177,11 +189,6 @@ function detectDatetime(str: string): DetectDateTimeResult {
     const dateStringWithoutTimezoneCode = splittedString.slice(0, -1).join(" ");
     const timezoneCode = splittedString.at(-1);
 
-    console.log({
-      dateStringWithoutTimezoneCode,
-      timezoneCode,
-    });
-
     if (!timezoneCode) {
       return { status: "error", data: null };
     }
@@ -194,12 +201,9 @@ function detectDatetime(str: string): DetectDateTimeResult {
       dateStringWithoutTimezoneCode.concat(timezoneInfo.utc_offset)
     );
 
-    console.log({ utcDate });
-
     // 4. return the utc date
     return { status: "success", data: utcDate, timezoneInfo };
   } catch (e) {
-    console.log("errornya ini: ", e);
     return { status: "error", data: null };
   }
 }

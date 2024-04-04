@@ -10,8 +10,6 @@ import { useState } from "react";
 import { TimezoneStaticInfo } from "./model";
 import CloseIcon from "./close-icon";
 
-// April 3, 2024 9:00 PM ET
-
 export default function TimeCalculator() {
   const [time, setTime] = useState("");
 
@@ -190,7 +188,6 @@ function detectDatetime(str: string): DetectDateTimeResult {
       const timezoneInfo = getTimezoneInfoFromCode(
         timezoneString.replace(/[^a-zA-Z]/g, "").toUpperCase()
       );
-      console.log({ haiyaaa: timezoneInfo });
       if (timezoneInfo) {
         return { status: "success", data: date, timezoneInfo };
       }
@@ -219,7 +216,6 @@ function detectDatetime(str: string): DetectDateTimeResult {
     const splittedString = str.split(" ");
     const dateStringWithoutTimezoneCode = splittedString.slice(0, -1).join(" ");
     const timezoneCode = splittedString.at(-1);
-    console.log({ timezoneCode });
 
     if (!timezoneCode) {
       return { status: "error", data: null };

@@ -10,122 +10,11 @@ import { useState } from "react";
 import { TimezoneStaticInfo } from "./model";
 import CloseIcon from "./close-icon";
 
+// April 3, 2024 9:00 PM ET
+
 export default function TimeCalculator() {
   const [time, setTime] = useState("");
 
-  function renderResult() {
-    const detectedDatetimeResult = detectDatetime(time);
-    const status = detectedDatetimeResult.status;
-
-    // Display idle message when the input is empty
-    if (time === "") {
-      return (
-        <div>
-          <div className="mt-2">
-            <p className="text-slate-600">Example:</p>
-            <ul className="list-disc list-inside">
-              <li>
-                <button
-                  className="cursor-pointer hover:font-semibold"
-                  onClick={() => setTime("Sat Jan 6, 2024 12:59 AM CET")}
-                >
-                  Sat Jan 6, 2024 12:59 AM CET
-                </button>
-              </li>
-              <li>
-                <button
-                  className="cursor-pointer hover:font-semibold"
-                  onClick={() => setTime("21/02/1999")}
-                >
-                  21/02/1999
-                </button>
-              </li>
-              <li>
-                <button
-                  className="cursor-pointer hover:font-semibold"
-                  onClick={() => setTime("2024/12/12")}
-                >
-                  {" "}
-                  2024/12/12
-                </button>
-              </li>
-            </ul>
-          </div>
-        </div>
-      );
-    }
-
-    // Display error message if the datetime is invalid
-    if (status === "error") {
-      return <p className="text-lg mt-4">Invalid datetime</p>;
-    }
-
-    // Display error message if the datetime is invalid (NaN)
-    const date = detectedDatetimeResult.data;
-
-    if (date == null || isNaN(date.getTime())) {
-      return <p className="text-lg mt-4">Invalid datetime</p>;
-    }
-
-    // Display the result (calcualte some variables first)
-    const timezoneInfo = detectedDatetimeResult.timezoneInfo;
-
-    const duration = intervalToDuration({
-      start: new Date(),
-      end: date,
-    });
-
-    const durationFromNow = formatDuration(duration, {
-      format: ["years", "months", "days", "hours", "minutes"],
-    });
-
-    const distanceFromNow = formatDistanceToNow(date, {
-      addSuffix: true,
-      includeSeconds: true,
-    });
-
-    return (
-      <div className="mt-10">
-        <p className="text-green-700 font-bold text-2xl">Time Detected!</p>
-
-        {/* The time with it's detail */}
-        <div>
-          {timezoneInfo?.timezone ? (
-            <span>
-              The time is in&nbsp;
-              <span className="font-bold">
-                {timezoneInfo?.timezone} ({timezoneInfo?.abbreviation})
-              </span>
-            </span>
-          ) : (
-            <span>The time contains no timezone information</span>
-          )}
-        </div>
-
-        {/* In my local time */}
-        <div className="mt-4 text-slate-500">In your local time:</div>
-        <div className="text-2xl">
-          <p>{Intl.DateTimeFormat().resolvedOptions().timeZone}</p>
-        </div>
-        <div>
-          <p className="text-2xl font-bold">
-            {date.toLocaleDateString(undefined, { dateStyle: "full" })}
-          </p>
-        </div>
-
-        <div>
-          <p className="text-2xl font-bold">{date.toLocaleTimeString()}</p>
-        </div>
-
-        {/* Relative to me */}
-        <div className="mt-4 ">
-          <p className="text-slate-500">Relative to you:</p>
-          <p className="text-2xl font-bold">Around {distanceFromNow}</p>
-          <p>Exactly {durationFromNow}</p>
-        </div>
-      </div>
-    );
-  }
   return (
     <section>
       <div className="relative">
@@ -145,8 +34,138 @@ export default function TimeCalculator() {
         )}
       </div>
 
-      <div className="flex flex-col gap-2">{renderResult()}</div>
+      <div className="flex flex-col gap-2">
+        {time === "" ? (
+          <div>
+            <div className="mt-2">
+              <p className="text-slate-600">Example:</p>
+              <ul className="list-disc list-inside">
+                {[
+                  "Sat Jan 6, 2024 12:59 AM CET",
+                  "21/02/1999",
+                  "2024/12/12",
+                  "April 3, 2024 9:00 PM EST",
+                ].map((example) => (
+                  <li key={example}>
+                    <button
+                      className="cursor-pointer hover:font-semibold"
+                      onClick={() => setTime(example)}
+                    >
+                      {example}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        ) : (
+          <Result time={time} />
+        )}
+      </div>
     </section>
+  );
+}
+
+function Result({ time }: { time: string }) {
+  const detectedDatetimeResult = detectDatetime(time);
+  const status = detectedDatetimeResult.status;
+
+  // Display error message if the datetime is invalid
+  if (status === "error") {
+    return (
+      <p className="text-lg mt-4">
+        Sorry, I&apos;m not smart enough to understand that as a time
+      </p>
+    );
+  }
+
+  // Display error message if the datetime is invalid (NaN)
+  const date = detectedDatetimeResult.data;
+
+  if (date == null || isNaN(date.getTime())) {
+    return (
+      <p className="text-lg mt-4">
+        Sorry, I&apos;m not smart enough to understand that as a time
+      </p>
+    );
+  }
+
+  // Display the result (calcualte some variables first)
+  const timezoneInfo = detectedDatetimeResult.timezoneInfo;
+
+  const duration = intervalToDuration({
+    start: new Date(),
+    end: date,
+  });
+
+  const durationFromNow = formatDuration(duration, {
+    format: ["years", "months", "days", "hours", "minutes"],
+  });
+
+  const distanceFromNow = formatDistanceToNow(date, {
+    addSuffix: true,
+    includeSeconds: true,
+  });
+
+  return (
+    <div className="mt-6">
+      <p className="text-green-700 font-bold text-2xl">Time Detected!</p>
+
+      {/* The time with it's detail */}
+      <h4 className="mt-8 text-xl">Time information</h4>
+
+      <div className="mt-2 border-4 rounded-xl bg-white/20 p-4">
+        {timezoneInfo?.timezone ? (
+          <p>
+            The time is in&nbsp;
+            <span className="font-bold">
+              {timezoneInfo?.timezone} ({timezoneInfo?.abbreviation})
+            </span>
+          </p>
+        ) : (
+          <p>The time contains no timezone information</p>
+        )}
+        <p className="mt-2 text-2xl font-bold">
+          {date.toLocaleDateString(undefined, {
+            dateStyle: "full",
+            timeZone: timezoneInfo?.timezone,
+          })}
+        </p>
+
+        <p className="mt-1 text-xl font-bold">
+          {date.toLocaleTimeString(undefined, {
+            timeZone: timezoneInfo?.timezone,
+          })}
+        </p>
+      </div>
+
+      {/* In my local time */}
+      <h4 className="mt-8 text-xl">Time information in your local time:</h4>
+
+      <div className="mt-2 border-4 rounded-xl bg-white/20 p-4">
+        <p>
+          Your timezone:{" "}
+          <span className="font-bold">
+            {Intl.DateTimeFormat().resolvedOptions().timeZone}
+          </span>
+        </p>
+
+        <p className="mt-2 text-2xl font-bold">
+          {date.toLocaleDateString(undefined, { dateStyle: "full" })}
+        </p>
+
+        <p className="mt-1 text-xl font-bold">{date.toLocaleTimeString()}</p>
+
+        {/* Relative to me */}
+        <div className="mt-4 ">
+          <p className="text-slate-500">Relative to you:</p>
+          <p className="text-2xl font-bold">
+            {upperCaseFirstLetter(distanceFromNow)}
+          </p>
+          <p>Exactly {durationFromNow}</p>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -163,6 +182,18 @@ function detectDatetime(str: string): DetectDateTimeResult {
   try {
     const date = new Date(str);
     if (date instanceof Date && !isNaN(date.getTime())) {
+      // Check if it contains timezone information
+      const timezoneString = str.split(" ").at(-1);
+      if (timezoneString == null) {
+        return { status: "success", data: date };
+      }
+      const timezoneInfo = getTimezoneInfoFromCode(
+        timezoneString.replace(/[^a-zA-Z]/g, "").toUpperCase()
+      );
+      console.log({ haiyaaa: timezoneInfo });
+      if (timezoneInfo) {
+        return { status: "success", data: date, timezoneInfo };
+      }
       return { status: "success", data: date };
     }
 
@@ -188,6 +219,7 @@ function detectDatetime(str: string): DetectDateTimeResult {
     const splittedString = str.split(" ");
     const dateStringWithoutTimezoneCode = splittedString.slice(0, -1).join(" ");
     const timezoneCode = splittedString.at(-1);
+    console.log({ timezoneCode });
 
     if (!timezoneCode) {
       return { status: "error", data: null };
@@ -218,4 +250,8 @@ function initializeTimezoneCodeToInfoMap() {
 function getTimezoneInfoFromCode(timezoneCode: string) {
   initializeTimezoneCodeToInfoMap();
   return timezoneCodeToInfoMap[timezoneCode];
+}
+
+function upperCaseFirstLetter(str: string) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
 }
